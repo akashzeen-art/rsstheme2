@@ -1,0 +1,121 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body, #root {
+    min-height: 100%;
+    background-color: #000000;
+  }
+
+  body {
+    color: #ffffff;
+    font-family: "Netflix Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+  }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(229,9,20,0.5); border-radius: 2px; }
+}
+
+@layer utilities {
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
+  .glass {
+    background: rgba(229,9,20,0.85);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+
+  .netflix-red { color: #fff; }
+  .bg-netflix-red { background-color: #c0070f; }
+  .bg-netflix-dark { background-color: #E50914; }
+  .bg-netflix-card { background-color: #c0070f; }
+}
+
+/* Netflix-style row hover — lift cards on row hover */
+.netflix-row:hover .netflix-card {
+  transform: translateX(-8%);
+}
+.netflix-row .netflix-card:hover ~ .netflix-card {
+  transform: translateX(8%);
+}
+.netflix-row .netflix-card:hover {
+  transform: scale(1.25) !important;
+  z-index: 10;
+}
+
+/* Smooth focus ring */
+button:focus-visible {
+  outline: 2px solid #E50914;
+  outline-offset: 2px;
+}
+
+/* Hero letter hover + star sprinkle */
+.letter {
+  cursor: default;
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.25s ease;
+}
+
+.letter:hover,
+.letter.letter-lit {
+  transform: translateY(-6px) scale(1.12);
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+}
+
+.hero-star-particle {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  color: #fff;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  text-shadow:
+    0 0 6px rgba(255, 255, 255, 0.9),
+    0 0 14px rgba(255, 220, 180, 0.7),
+    0 0 22px rgba(229, 9, 20, 0.35);
+  animation: hero-star-fly var(--dur, 0.8s) cubic-bezier(0.15, 0.85, 0.35, 1) forwards;
+}
+
+@keyframes hero-star-fly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(0, 0) rotate(0deg) scale(0.4);
+  }
+  40% {
+    opacity: 1;
+    transform: translate(-50%, -50%) translate(calc(var(--tx) * 0.55), calc(var(--ty) * 0.55))
+      rotate(calc(var(--rot) * 0.5)) scale(1.15);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -50%) translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(0.2);
+  }
+}
+
+/* Video player range input */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  cursor: pointer;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #E50914;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+input[type="range"]:hover::-webkit-slider-thumb {
+  opacity: 1;
+}

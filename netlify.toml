@@ -1,0 +1,23 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# API: RSS proxy
+[[redirects]]
+  from = "/api/rss"
+  to = "/.netlify/functions/rss"
+  status = 200
+  force = true
+
+# Proxy TMZ share pages (must be before SPA fallback)
+[[redirects]]
+  from = "/tmz-share/*"
+  to = "https://share.tmz.com/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
