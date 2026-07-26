@@ -326,6 +326,26 @@ function ReelSlide({
             <ChevronUp size={16} /> Swipe up
           </div>
         )}
+
+        {index === total - 1 && active && (
+          <div
+            style={{
+              position: "absolute",
+              bottom: 72,
+              left: "50%",
+              transform: "translateX(-50%)",
+              zIndex: 3,
+              color: "rgba(255,255,255,0.75)",
+              fontSize: 12,
+              fontWeight: 600,
+              letterSpacing: "0.04em",
+              pointerEvents: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            ↓ Scroll down for more
+          </div>
+        )}
       </div>
     </div>
   );
@@ -349,13 +369,56 @@ const iconBtn: React.CSSProperties = {
 export default function VerticalReelsFeed({ items }: { items: RssCardItem[] }) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const [root, setRoot] = useState<HTMLElement | null>(null);
+  const touchStartY = useRef(0);
 
   useEffect(() => {
     setRoot(scrollerRef.current);
   }, []);
 
+  // Release page scroll when user swipes past first/last reel (fixes mobile trap)
+  useEffect(() => {
+    const el = scrollerRef.current;
+    if (!el) return;
+
+    const atTop = () => el.scrollTop <= 1;
+    const atBottom = () => el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
+
+    const onWheel = (e: WheelEvent) => {
+      if ((e.deltaY < 0 && atTop()) || (e.deltaY > 0 && atBottom())) {
+        // let the page scroll
+        return;
+      }
+      e.stopPropagation();
+    };
+
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0]?.clientY ?? 0;
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      const y = e.touches[0]?.clientY ?? 0;
+      const dy = touchStartY.current - y; // >0 swipe up (next), <0 swipe down (prev)
+      if ((dy < 0 && atTop()) || (dy > 0 && atBottom())) {
+        // Don't lock the gesture — page can scroll
+        el.style.overflowY = "hidden";
+        requestAnimationFrame(() => {
+          el.style.overflowY = "auto";
+        });
+      }
+    };
+
+    el.addEventListener("wheel", onWheel, { passive: true });
+    el.addEventListener("touchstart", onTouchStart, { passive: true });
+    el.addEventListener("touchmove", onTouchMove, { passive: true });
+    return () => {
+      el.removeEventListener("wheel", onWheel);
+      el.removeEventListener("touchstart", onTouchStart);
+      el.removeEventListener("touchmove", onTouchMove);
+    };
+  }, []);
+
   return (
-    <div style={{ padding: "0 16px 12px" }}>
+    <div style={{ padding: "0 16px 20px" }}>
       <style>{`
         @keyframes reelHintBounce {
           0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.55; }
@@ -367,7 +430,7 @@ export default function VerticalReelsFeed({ items }: { items: RssCardItem[] }) {
         ref={scrollerRef}
         className="vertical-reels-scroller"
         style={{
-          height: "min(78vh, 720px)",
+          height: "min(70vh, 640px)",
           maxWidth: 420,
           margin: "0 auto",
           overflowY: "auto",
@@ -378,7 +441,8 @@ export default function VerticalReelsFeed({ items }: { items: RssCardItem[] }) {
           border: "1px solid rgba(255,255,255,0.08)",
           background: "#000",
           scrollbarWidth: "none",
-          overscrollBehaviorY: "contain",
+          overscrollBehaviorY: "auto",
+          touchAction: "pan-y",
         }}
       >
         {items.map((item, i) => (
@@ -391,6 +455,17 @@ export default function VerticalReelsFeed({ items }: { items: RssCardItem[] }) {
           />
         ))}
       </div>
+      <p
+        style={{
+          textAlign: "center",
+          color: "#666",
+          fontSize: 12,
+          margin: "12px 0 0",
+          letterSpacing: "0.04em",
+        }}
+      >
+        Swipe reels ↑ · scroll page ↓ for more
+      </p>
     </div>
   );
 }

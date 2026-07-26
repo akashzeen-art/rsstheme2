@@ -91,14 +91,12 @@ export default function HeroSection({ onWatchNow, onExplore }: Props) {
     return () => clearInterval(t);
   }, []);
 
-  const onHeroMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const { clientX, clientY } = e;
+  const onHeroMove = useCallback((clientX: number, clientY: number) => {
     const dx = clientX - lastPos.current.x;
     const dy = clientY - lastPos.current.y;
     const dist = Math.hypot(dx, dy);
     lastPos.current = { x: clientX, y: clientY };
 
-    // Skip tiny jitter; spawn along the path as the cursor travels
     if (dist < 4) return;
 
     const now = performance.now();
@@ -109,11 +107,28 @@ export default function HeroSection({ onWatchNow, onExplore }: Props) {
     spawnStars(clientX, clientY, burst);
   }, []);
 
+  const onPointerMove = useCallback(
+    (e: React.PointerEvent<HTMLDivElement>) => {
+      onHeroMove(e.clientX, e.clientY);
+    },
+    [onHeroMove]
+  );
+
+  const onTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLDivElement>) => {
+      const t = e.touches[0];
+      if (!t) return;
+      onHeroMove(t.clientX, t.clientY);
+    },
+    [onHeroMove]
+  );
+
   return (
     <div
       className="relative w-full overflow-hidden"
-      style={{ height: "100vh", minHeight: "640px", background: "#0a0000" }}
-      onMouseMove={onHeroMove}
+      style={{ height: "100vh", minHeight: "640px", background: "#0a0000", touchAction: "pan-y" }}
+      onPointerMove={onPointerMove}
+      onTouchMove={onTouchMove}
     >
 
       {/* Red theme background */}
