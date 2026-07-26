@@ -82,7 +82,14 @@ export async function fetchPlatformRss(
   limit = 12
 ): Promise<{ title: string; items: RssCardItem[] }> {
   const res = await fetch(`/api/rss?url=${encodeURIComponent(feedUrl)}`);
-  if (!res.ok) throw new Error(`RSS fetch failed: ${res.status}`);
+  if (!res.ok) {
+    const detail = await res.text().catch(() => "");
+    throw new Error(`RSS fetch failed: ${res.status} ${detail.slice(0, 120)}`);
+  }
   const xml = await res.text();
+  // Guard: API sometimes returns JSON error HTML
+  if (xml.trimStart().startsWith("{") || xml.trimStart().startsWith("<!DOCTYPE")) {
+    throw new Error("RSS proxy returned non-XML response");
+  }
   return parseRssXml(xml, limit);
 }

@@ -1,33 +1,22 @@
 import { useEffect, useState } from "react";
 import { AutoplayRssCard, RssCardItem, toEmbedUrl } from "./AutoplayRssCard";
+import { fetchPlatformRss } from "../lib/platformRss";
+
+const TMZ_FEED = "https://rss.app/feeds/yb2RiZKyhZogVKnx.xml";
 
 export default function TMZReels() {
   const [items, setItems] = useState<RssCardItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("https://rss.app/feeds/yb2RiZKyhZogVKnx.xml")
-      .then(r => r.text())
-      .then(xml => {
-        const doc = new DOMParser().parseFromString(xml, "application/xml");
-        const nodes = Array.from(doc.querySelectorAll("item")).slice(0, 12);
+    fetchPlatformRss(TMZ_FEED, 12)
+      .then(({ items: next }) => {
         setItems(
-          nodes.map(n => {
-            const mediaImg = n.querySelector("content")?.getAttribute("url") ?? "";
-            const desc = n.querySelector("description")?.textContent ?? "";
-            const match = desc.match(/<img[^>]+src=["']([^"']+)['"]/);
-            const descImg = match?.[1] ?? "";
-            const link = n.querySelector("link")?.textContent ?? "#";
-            return {
-              title: n.querySelector("title")?.textContent ?? "",
-              link,
-              embedUrl: toEmbedUrl(link, desc),
-              image: mediaImg || descImg,
-              fallback: descImg,
-              date: n.querySelector("pubDate")?.textContent ?? "",
-              source: "TMZ",
-            };
-          })
+          next.map(item => ({
+            ...item,
+            source: "TMZ",
+            embedUrl: item.embedUrl || toEmbedUrl(item.link),
+          }))
         );
       })
       .catch(() => setItems([]))

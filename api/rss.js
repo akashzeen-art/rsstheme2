@@ -1,11 +1,14 @@
 /**
  * Vercel Serverless Function — GET /api/rss?url=… | ?channel_id=…
- * Keeps YouTube / RSS feeds working after Vercel deployment.
+ * ESM export (package.json has "type": "module").
  */
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.setHeader("Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+  res.setHeader(
+    "Cache-Control",
+    "public, s-maxage=300, stale-while-revalidate=600"
+  );
 
   if (req.method === "OPTIONS") {
     res.status(204).end();
@@ -13,9 +16,14 @@ module.exports = async function handler(req, res) {
   }
 
   try {
-    const urlParam = typeof req.query.url === "string" ? req.query.url : "";
+    const q = req.query || {};
+    const urlParam = typeof q.url === "string" ? q.url : Array.isArray(q.url) ? q.url[0] : "";
     const channelId =
-      typeof req.query.channel_id === "string" ? req.query.channel_id : "";
+      typeof q.channel_id === "string"
+        ? q.channel_id
+        : Array.isArray(q.channel_id)
+          ? q.channel_id[0]
+          : "";
 
     let feedUrl = urlParam;
     if (!feedUrl && channelId) {
@@ -42,10 +50,12 @@ module.exports = async function handler(req, res) {
 
     const r = await fetch(upstream.toString(), {
       headers: {
-        "User-Agent": "CinemaX-RSS/1.0",
+        "User-Agent":
+          "Mozilla/5.0 (compatible; CinemaX-RSS/1.0; +https://vercel.app)",
         Accept:
           "application/atom+xml, application/rss+xml, application/xml, text/xml, */*",
       },
+      redirect: "follow",
     });
 
     const body = await r.text();
@@ -58,7 +68,7 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     res.status(502).json({
       error: "Upstream fetch failed",
-      detail: String(err),
+      detail: String(err && err.message ? err.message : err),
     });
   }
-};
+}
