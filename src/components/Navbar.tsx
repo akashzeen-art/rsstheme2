@@ -20,7 +20,6 @@ const navItems: { label: string; action: (onMyAccount: () => void) => void }[] =
   { label: "Movies",             action: () => document.getElementById("mission")?.scrollIntoView({ behavior: "smooth" }) },
   { label: "New & Hot",          action: () => document.getElementById("dangerous")?.scrollIntoView({ behavior: "smooth" }) },
   { label: "My List",            action: () => document.getElementById("escape")?.scrollIntoView({ behavior: "smooth" }) },
-  { label: "Browse by Language", action: () => document.getElementById("premium-collection")?.scrollIntoView({ behavior: "smooth" }) },
 ];
 
 export default function Navbar({ onMyAccount }: Props) {

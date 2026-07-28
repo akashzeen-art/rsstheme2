@@ -19,7 +19,6 @@ const BADGE_COLORS: Record<string, string> = {
 function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
   const [items, setItems] = useState<RssCardItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [channelName, setChannelName] = useState("");
 
   useEffect(() => {
     if (cat.source === "platform") {
@@ -37,9 +36,8 @@ function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
     let cancelled = false;
     setLoading(true);
     fetchPlatformRss(feedUrl, cat.limit ?? 12)
-      .then(({ title, items: next }) => {
+      .then(({ items: next }) => {
         if (cancelled) return;
-        setChannelName(title);
         setItems(next);
       })
       .catch(() => {
@@ -88,12 +86,18 @@ function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
         <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: "0.02em" }}>
           {cat.title}
         </h2>
-        {channelName && (
-          <span style={{ color: "#666", fontSize: 12 }}>
-            {channelName} · {isReel ? "Swipe up" : "Autoplaying"}
-          </span>
-        )}
+        <span style={{ color: "#666", fontSize: 12 }}>
+          {isReel ? "Swipe up" : "Autoplaying"}
+        </span>
       </div>
+      <p className="rss-live-badge-wrap">
+        <span className="rss-live-badge">
+          <span className="rss-live-badge-dot">(◉)</span> LIVE
+        </span>
+        <span style={{ display: "block", marginTop: 8, color: "#fff", fontSize: 11 }}>
+          Live feed not meant for commercial purpose only for entertainment purpose
+        </span>
+      </p>
 
       {isReel ? (
         <VerticalReelsFeed items={items} />

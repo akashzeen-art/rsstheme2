@@ -9,6 +9,42 @@ function attrNS(el: Element, local: string, attr: string): string {
   return el.getElementsByTagNameNS("*", local)[0]?.getAttribute(attr) ?? "";
 }
 
+function firstImageUrlFromElements(el: Element): string {
+  const all = Array.from(el.getElementsByTagName("*"));
+
+  // Prefer MRSS/media urls first
+  for (const node of all) {
+    const local = (node.localName || "").toLowerCase();
+    if (local === "content" || local === "thumbnail") {
+      const url = node.getAttribute("url") || node.getAttribute("href") || "";
+      const medium = (node.getAttribute("medium") || "").toLowerCase();
+      if (url && (medium === "image" || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+        return url;
+      }
+    }
+  }
+
+  // Then enclosure-based images
+  for (const node of all) {
+    const local = (node.localName || "").toLowerCase();
+    if (local === "enclosure") {
+      const url = node.getAttribute("url") || "";
+      const type = (node.getAttribute("type") || "").toLowerCase();
+      if (url && (type.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+        return url;
+      }
+    }
+  }
+
+  // Fallback: any node carrying a likely image URL
+  for (const node of all) {
+    const url = node.getAttribute("url") || node.getAttribute("href") || "";
+    if (url && /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url)) return url;
+  }
+
+  return "";
+}
+
 /** Parse YouTube Atom or generic RSS 2.0 / MRSS into card items */
 export function parseRssXml(xml: string, limit = 12): { title: string; items: RssCardItem[] } {
   const doc = new DOMParser().parseFromString(xml, "application/xml");
@@ -53,22 +89,20 @@ export function parseRssXml(xml: string, limit = 12): { title: string; items: Rs
   const nodes = Array.from(doc.querySelectorAll("item")).slice(0, limit);
   const items = nodes.map(n => {
     const desc = n.querySelector("description")?.textContent ?? "";
-    const mediaImg =
-      n.querySelector("content")?.getAttribute("url") ||
-      attrNS(n, "content", "url") ||
-      attrNS(n, "thumbnail", "url") ||
-      "";
+    const mediaImg = firstImageUrlFromElements(n);
     const enclosure = n.querySelector("enclosure")?.getAttribute("url") ?? "";
-    const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["']/);
+    const imgMatch =
+      desc.match(/<img[^>]+src=["']([^"']+)["']/i) ??
+      desc.match(/https?:\/\/[^\s"'<>]+?\.(?:jpg|jpeg|png|webp|gif)(?:\?[^\s"'<>]*)?/i);
     const link = n.querySelector("link")?.textContent?.trim() || "#";
-    const image = mediaImg || enclosure || imgMatch?.[1] || "";
+    const image = mediaImg || enclosure || imgMatch?.[1] || imgMatch?.[0] || "";
 
     return {
       title: n.querySelector("title")?.textContent ?? "",
       link,
       embedUrl: toEmbedUrl(link, desc),
       image,
-      fallback: imgMatch?.[1] || enclosure,
+      fallback: imgMatch?.[1] || imgMatch?.[0] || enclosure,
       date: n.querySelector("pubDate")?.textContent ?? "",
       source: textNS(n, "creator") || feedTitle,
     };

@@ -93,60 +93,21 @@ function AutoplayVideo({
   );
 }
 
-function ytPost(iframe: HTMLIFrameElement | null, func: string, args: unknown[] = []) {
-  iframe?.contentWindow?.postMessage(
-    JSON.stringify({ event: "command", func, args }),
-    "*"
-  );
-}
-
-/** YouTube embed that forces muted autoplay via IFrame API when visible */
+/** YouTube embed autoplay without postMessage API calls */
 function YouTubeAutoplayFrame({
   src,
   title,
-  active,
 }: {
   src: string;
   title: string;
-  active: boolean;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
-
-  const kickPlay = useCallback(() => {
-    const iframe = iframeRef.current;
-    if (!iframe) return;
-    ytPost(iframe, "mute");
-    ytPost(iframe, "playVideo");
-  }, []);
-
-  useEffect(() => {
-    clearInterval(timerRef.current);
-    if (!active) {
-      ytPost(iframeRef.current, "pauseVideo");
-      return;
-    }
-    kickPlay();
-    // Keep nudging play for a few seconds (YT often ignores the first commands)
-    let n = 0;
-    timerRef.current = setInterval(() => {
-      kickPlay();
-      if (++n >= 8) clearInterval(timerRef.current);
-    }, 500);
-    return () => clearInterval(timerRef.current);
-  }, [active, src, kickPlay]);
-
   return (
     <iframe
-      ref={iframeRef}
       key={src}
       src={src}
       title={title}
       allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
       allowFullScreen
-      onLoad={() => {
-        if (active) kickPlay();
-      }}
       style={{
         position: "absolute",
         inset: 0,
@@ -276,7 +237,6 @@ export function AutoplayRssCard({
             src={item.image}
             alt=""
             referrerPolicy="no-referrer"
-            crossOrigin="anonymous"
             style={{
               position: "absolute",
               inset: 0,
@@ -308,7 +268,6 @@ export function AutoplayRssCard({
           <YouTubeAutoplayFrame
             src={item.embedUrl}
             title={item.title}
-            active={inView || isFs}
           />
         )}
 

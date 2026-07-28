@@ -54,6 +54,14 @@ export default function TMZReels() {
         </h2>
         <span style={{ color: "#666", fontSize: 12 }}>Autoplaying</span>
       </div>
+      <p className="rss-live-badge-wrap">
+        <span className="rss-live-badge">
+          <span className="rss-live-badge-dot">(◉)</span> LIVE
+        </span>
+        <span style={{ display: "block", marginTop: 8, color: "#fff", fontSize: 11 }}>
+          Live feed not meant for commercial purpose only for entertainment purpose
+        </span>
+      </p>
 
       <div
         style={{

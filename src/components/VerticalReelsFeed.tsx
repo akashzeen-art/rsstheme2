@@ -1,65 +1,24 @@
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronUp, Maximize, Minimize, Volume2, VolumeX } from "lucide-react";
 import type { RssCardItem } from "./AutoplayRssCard";
 import { timeAgo } from "./AutoplayRssCard";
 import { isTmzEmbed, resolveTmzVideoUrl } from "../lib/tmzVideo";
 import Hls from "hls.js";
 
-function ytPost(iframe: HTMLIFrameElement | null, func: string, args: unknown[] = []) {
-  iframe?.contentWindow?.postMessage(
-    JSON.stringify({ event: "command", func, args }),
-    "*"
-  );
-}
-
 function YouTubeFrame({
   src,
   title,
-  active,
-  muted = true,
 }: {
   src: string;
   title: string;
-  active: boolean;
-  muted?: boolean;
 }) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
-
-  const kickPlay = useCallback(() => {
-    ytPost(iframeRef.current, muted ? "mute" : "unMute");
-    ytPost(iframeRef.current, "playVideo");
-  }, [muted]);
-
-  useEffect(() => {
-    clearInterval(timerRef.current);
-    if (!active) {
-      ytPost(iframeRef.current, "pauseVideo");
-      return;
-    }
-    kickPlay();
-    let n = 0;
-    timerRef.current = setInterval(() => {
-      kickPlay();
-      if (++n >= 8) clearInterval(timerRef.current);
-    }, 500);
-    return () => clearInterval(timerRef.current);
-  }, [active, src, kickPlay]);
-
-  useEffect(() => {
-    if (!active) return;
-    ytPost(iframeRef.current, muted ? "mute" : "unMute");
-  }, [muted, active]);
-
   return (
     <iframe
-      ref={iframeRef}
       key={src}
       src={src}
       title={title}
       allow="autoplay; encrypted-media; fullscreen; picture-in-picture"
       allowFullScreen
-      onLoad={() => active && kickPlay()}
       style={{
         position: "absolute",
         inset: 0,
@@ -229,7 +188,7 @@ function ReelSlide({
           <NativeVideo src={videoSrc} poster={item.image} active={active} muted={muted} />
         )}
         {active && isYouTube && item.embedUrl && (
-          <YouTubeFrame src={item.embedUrl} title={item.title} active={active} muted={muted} />
+          <YouTubeFrame src={item.embedUrl} title={item.title} />
         )}
 
         {/* gradient + meta */}

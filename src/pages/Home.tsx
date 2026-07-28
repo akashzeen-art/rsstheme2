@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import { motion } from "framer-motion";
 import Navbar from "../components/Navbar";
 import HeroSection from "../components/HeroSection";
+import Hero360 from "../components/Hero360";
 import VideoSection from "../components/VideoSection";
 import UnlockModal from "../components/UnlockModal";
 import AccountModal from "../components/AccountModal";
@@ -16,17 +17,39 @@ import PlatformRssSection, { PlatformRssCategoryRow } from "../components/Platfo
 import { homeSections, Video } from "../data/videos";
 import { loadAccess, saveAccess, clearAccess, UserAccess } from "../lib/access";
 
+const HERO_KEY = "cinemax-hero-variant";
+
+function readNextHeroVariant(): "classic" | "360" {
+  try {
+    const last = localStorage.getItem(HERO_KEY);
+    // Alternate each refresh: classic ↔ 360
+    return last === "classic" ? "360" : "classic";
+  } catch {
+    return Math.random() < 0.5 ? "classic" : "360";
+  }
+}
+
 export default function Home() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [showModal, setShowModal]         = useState(false);
   const [showAccount, setShowAccount]     = useState(false);
   const [showPlayer, setShowPlayer]       = useState(false);
   const [access, setAccess]               = useState<UserAccess | null>(null);
+  const [heroVariant] = useState<"classic" | "360">(readNextHeroVariant);
   const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setAccess(loadAccess());
   }, []);
+
+  // Persist after mount so React Strict Mode can't flip twice on init
+  useEffect(() => {
+    try {
+      localStorage.setItem(HERO_KEY, heroVariant);
+    } catch {
+      /* ignore */
+    }
+  }, [heroVariant]);
 
   const playVideo = (v: Video) => {
     setSelectedVideo(v);
@@ -61,17 +84,17 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
       >
-        <HeroSection onWatchNow={playVideo} onExplore={scrollToCollection} />
-
-        <TMZReels />
-        <YouTubeReels />
+        {heroVariant === "classic" ? (
+          <HeroSection onWatchNow={playVideo} onExplore={scrollToCollection} />
+        ) : (
+          <Hero360 onWatchNow={playVideo} />
+        )}
 
         {/* Video rows */}
         <div ref={contentRef} id="premium-collection" style={{ background: "#000" }}>
           {homeSections.map(sec => (
-            <>
+            <Fragment key={sec.id}>
               <VideoSection
-                key={sec.id}
                 id={sec.id}
                 title={sec.title}
                 subtitle={sec.subtitle}
@@ -79,15 +102,17 @@ export default function Home() {
                 layout={sec.layout}
                 onVideoClick={playVideo}
               />
+              {sec.id === "mission" && <YouTubeReels />}
               {sec.id === "escape" && <PlatformRssCategoryRow categoryId="reels" />}
               {sec.id === "fatal" && <DeviceShowcase />}
               {sec.id === "dangerous" && <Carousel3D />}
-            </>
+            </Fragment>
           ))}
         </div>
 
         <ComingSoon />
         <PlatformRssSection excludeIds={["reels"]} />
+        <TMZReels />
         <Footer />
       </motion.div>
 

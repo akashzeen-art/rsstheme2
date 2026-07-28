@@ -9,14 +9,10 @@ const YT_FEED =
 export default function YouTubeReels() {
   const [items, setItems] = useState<RssCardItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [channelName, setChannelName] = useState("YouTube");
 
   useEffect(() => {
     fetchPlatformRss(YT_FEED, 12)
-      .then(({ title, items: next }) => {
-        setChannelName(title || "YouTube");
-        setItems(next);
-      })
+      .then(({ items: next }) => setItems(next))
       .catch(() => setItems([]))
       .finally(() => setLoading(false));
   }, []);
@@ -49,10 +45,18 @@ export default function YouTubeReels() {
           REELS
         </span>
         <h2 style={{ color: "#fff", fontSize: 20, fontWeight: 800, margin: 0, letterSpacing: "0.02em" }}>
-          YouTube Shorts
+          Shorts
         </h2>
-        <span style={{ color: "#666", fontSize: 12 }}>{channelName} · Autoplaying</span>
+        <span style={{ color: "#666", fontSize: 12 }}>Autoplaying</span>
       </div>
+      <p className="rss-live-badge-wrap">
+        <span className="rss-live-badge">
+          <span className="rss-live-badge-dot">(◉)</span> LIVE
+        </span>
+        <span style={{ display: "block", marginTop: 8, color: "#fff", fontSize: 11 }}>
+          Live feed not meant for commercial purpose only for entertainment purpose
+        </span>
+      </p>
 
       <div
         style={{

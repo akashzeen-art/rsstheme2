@@ -13,7 +13,7 @@ export default function Preloader({ onDone }: Props) {
     const timer = setTimeout(() => {
       setVisible(false);
       setTimeout(onDone, 600);
-    }, 4000);
+    }, 3000);
 
     return () => clearTimeout(timer);
   }, [onDone]);
