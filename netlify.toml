@@ -10,6 +10,20 @@
   status = 200
   force = true
 
+# API: Article proxy (iframe-safe)
+[[redirects]]
+  from = "/api/article"
+  to = "/.netlify/functions/article"
+  status = 200
+  force = true
+
+# API: Image proxy (RSS thumbnails)
+[[redirects]]
+  from = "/api/img"
+  to = "/.netlify/functions/img"
+  status = 200
+  force = true
+
 # Proxy TMZ share pages (must be before SPA fallback)
 [[redirects]]
   from = "/tmz-share/*"

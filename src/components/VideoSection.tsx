@@ -173,7 +173,7 @@ export default function VideoSection({ id, title, videos, onVideoClick }: Props)
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.02 }}
-                style={{ aspectRatio: v.aspect === "portrait" ? "2/3" : "16/9" }}
+                style={{ aspectRatio: v.aspect === "portrait" ? "1080 / 1350" : "1350 / 760" }}
               >
                 <VideoCard {...v} onClick={() => { onVideoClick(v); setShowAll(false); }} />
               </motion.div>

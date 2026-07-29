@@ -9,6 +9,10 @@ function attrNS(el: Element, local: string, attr: string): string {
   return el.getElementsByTagNameNS("*", local)[0]?.getAttribute(attr) ?? "";
 }
 
+function isImageUrl(url: string): boolean {
+  return /\.(jpe?g|png|webp|gif|avif)(\?|#|&|$)/i.test(url) || /[?&](format|fm)=(jpe?g|png|webp)/i.test(url);
+}
+
 function firstImageUrlFromElements(el: Element): string {
   const all = Array.from(el.getElementsByTagName("*"));
 
@@ -16,9 +20,12 @@ function firstImageUrlFromElements(el: Element): string {
   for (const node of all) {
     const local = (node.localName || "").toLowerCase();
     if (local === "content" || local === "thumbnail") {
-      const url = node.getAttribute("url") || node.getAttribute("href") || "";
+      const url = (node.getAttribute("url") || node.getAttribute("href") || "").trim();
       const medium = (node.getAttribute("medium") || "").toLowerCase();
-      if (url && (medium === "image" || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+      const type = (node.getAttribute("type") || "").toLowerCase();
+      if (!url || !/^https?:\/\//i.test(url)) continue;
+      // Skip content:encoded-style nodes with no media url usefulness
+      if (medium === "image" || type.startsWith("image/") || isImageUrl(url)) {
         return url;
       }
     }
@@ -28,9 +35,9 @@ function firstImageUrlFromElements(el: Element): string {
   for (const node of all) {
     const local = (node.localName || "").toLowerCase();
     if (local === "enclosure") {
-      const url = node.getAttribute("url") || "";
+      const url = (node.getAttribute("url") || "").trim();
       const type = (node.getAttribute("type") || "").toLowerCase();
-      if (url && (type.startsWith("image/") || /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url))) {
+      if (url && (type.startsWith("image/") || isImageUrl(url))) {
         return url;
       }
     }
@@ -38,11 +45,31 @@ function firstImageUrlFromElements(el: Element): string {
 
   // Fallback: any node carrying a likely image URL
   for (const node of all) {
-    const url = node.getAttribute("url") || node.getAttribute("href") || "";
-    if (url && /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url)) return url;
+    const url = (node.getAttribute("url") || node.getAttribute("href") || "").trim();
+    if (url && isImageUrl(url)) return url;
   }
 
   return "";
+}
+
+function stripHtml(html: string): string {
+  return html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;|&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function excerptFromDesc(desc: string, max = 160): string {
+  const text = stripHtml(desc);
+  if (!text) return "";
+  if (text.length <= max) return text;
+  return text.slice(0, max).replace(/\s+\S*$/, "") + "…";
 }
 
 /** Parse YouTube Atom or generic RSS 2.0 / MRSS into card items */
@@ -72,6 +99,10 @@ export function parseRssXml(xml: string, limit = 12): { title: string; items: Rs
         "";
       const author =
         n.querySelector("author > name")?.textContent?.trim() || feedTitle;
+      const summary =
+        n.querySelector("summary")?.textContent ||
+        n.querySelector("content")?.textContent ||
+        "";
 
       return {
         title,
@@ -81,6 +112,7 @@ export function parseRssXml(xml: string, limit = 12): { title: string; items: Rs
         fallback: videoId ? `https://i.ytimg.com/vi/${videoId}/mqdefault.jpg` : "",
         date,
         source: author,
+        excerpt: excerptFromDesc(summary),
       };
     });
     return { title: feedTitle, items };
@@ -88,7 +120,10 @@ export function parseRssXml(xml: string, limit = 12): { title: string; items: Rs
 
   const nodes = Array.from(doc.querySelectorAll("item")).slice(0, limit);
   const items = nodes.map(n => {
-    const desc = n.querySelector("description")?.textContent ?? "";
+    const desc =
+      n.querySelector("description")?.textContent ??
+      textNS(n, "encoded") ??
+      "";
     const mediaImg = firstImageUrlFromElements(n);
     const enclosure = n.querySelector("enclosure")?.getAttribute("url") ?? "";
     const imgMatch =
@@ -105,6 +140,7 @@ export function parseRssXml(xml: string, limit = 12): { title: string; items: Rs
       fallback: imgMatch?.[1] || imgMatch?.[0] || enclosure,
       date: n.querySelector("pubDate")?.textContent ?? "",
       source: textNS(n, "creator") || feedTitle,
+      excerpt: excerptFromDesc(desc),
     };
   });
 

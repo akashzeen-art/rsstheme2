@@ -3,12 +3,12 @@
  * Edit youtubeChannelId (or switch source to "rss" / "platform") to change feeds.
  *
  * YouTube: https://www.youtube.com/feeds/videos.xml?channel_id=UC…
- * Fetched via /api/rss (Vite middleware locally, Netlify function in production).
+ * Fetched via /api/rss (Vite middleware locally, Netlify/Vercel function in production).
  */
 
 export type PlatformRssSource = "youtube" | "rss" | "platform";
 
-export type PlatformRssLayout = "reel" | "landscape";
+export type PlatformRssLayout = "reel" | "landscape" | "articles";
 
 export interface PlatformRssCategory {
   id: string;
@@ -17,7 +17,7 @@ export interface PlatformRssCategory {
   source: PlatformRssSource;
   /** When source === "youtube" */
   youtubeChannelId?: string;
-  /** When source === "rss" — your own XML/MRSS (e.g. /feeds/movies.xml) */
+  /** When source === "rss" — rss.app XML URL */
   rssUrl?: string;
   /** When source === "platform" — catalog item IDs only (not wired yet) */
   platformSnos?: string[];
@@ -36,21 +36,30 @@ export const platformRssCategories: PlatformRssCategory[] = [
     limit: 12,
   },
   {
-    id: "custom-rss-last",
-    title: "Latest Updates",
-    badge: "RSS",
+    id: "movies-hollywood",
+    title: "Movies | Hollywood Reporter",
+    badge: "MOVIES",
     source: "rss",
-    rssUrl: "https://rss.app/feeds/EzpEwMiKLjzcyb6K.xml",
-    layout: "landscape",
+    rssUrl: "https://rss.app/feeds/Kokt3XvDewq5YvZp.xml",
+    layout: "articles",
     limit: 12,
   },
   {
-    id: "custom-rss-last-2",
-    title: "More Live Updates",
-    badge: "RSS",
+    id: "couples-news",
+    title: "Couples News",
+    badge: "LIVE",
     source: "rss",
-    rssUrl: "https://rss.app/feeds/4uf0iAUF9JZ5XgfO.xml",
-    layout: "landscape",
+    rssUrl: "https://rss.app/feeds/DY0mpELyWM1lzUs3.xml",
+    layout: "articles",
+    limit: 12,
+  },
+  {
+    id: "music-celebuzz",
+    title: "Celebuzz Entertainment",
+    badge: "LIVE",
+    source: "rss",
+    rssUrl: "https://rss.app/feeds/vI0CmUYD495xLLcy.xml",
+    layout: "articles",
     limit: 12,
   },
 
@@ -61,12 +70,6 @@ export const platformRssCategories: PlatformRssCategory[] = [
   //   source: "rss",
   //   rssUrl: "/feeds/movies.xml",
   //   layout: "landscape",
-  // },
-  // {
-  //   id: "catalog",
-  //   title: "From Catalog",
-  //   source: "platform",
-  //   platformSnos: [],
   // },
 ];
 
@@ -88,4 +91,15 @@ export function getCategoryFeedUrl(cat: PlatformRssCategory): string | null {
 /** Proxied fetch URL used by the client. */
 export function getRssApiUrl(feedUrl: string): string {
   return `/api/rss?url=${encodeURIComponent(feedUrl)}`;
+}
+
+/** Same-origin article proxy for iframe embeds (news sites block direct iframes). */
+export function getArticleProxyUrl(articleUrl: string): string {
+  return `/api/article?url=${encodeURIComponent(articleUrl)}`;
+}
+
+/** Same-origin image proxy for RSS thumbnails (CDN hotlink / referrer blocks). */
+export function getImageProxyUrl(imageUrl: string): string {
+  if (!imageUrl || imageUrl.startsWith("/api/img")) return imageUrl;
+  return `/api/img?url=${encodeURIComponent(imageUrl)}`;
 }

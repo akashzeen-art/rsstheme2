@@ -9,8 +9,8 @@ const GAMES = [
     genre: "Action • Shooter",
     rating: "4.8",
     players: "2.1M",
-    thumb: "/landscape/66.png",
-    portrait: "/portrait/66.png",
+    thumb: "/newlandscape/MISSSION DARKNIGHT.png",
+    portrait: "/newportrait/MISSSION DARKNIGHT.jpg",
     desc: "Infiltrate enemy strongholds in this fast-paced tactical shooter. Complete missions to unlock exclusive CinemaX content.",
     tag: "EXCLUSIVE",
     tagColor: "#E50914",
@@ -22,8 +22,8 @@ const GAMES = [
     genre: "Strategy • Crime",
     rating: "4.6",
     players: "1.4M",
-    thumb: "/landscape/87.png",
-    portrait: "/portrait/87.png",
+    thumb: "/newlandscape/CODE RED MAFIA.png",
+    portrait: "/newportrait/CODE RED MAFIA.jpg",
     desc: "Build your criminal empire from scratch. Outsmart rival gangs and become the city's most feared boss.",
     tag: "NEW",
     tagColor: "#10b981",
@@ -35,8 +35,8 @@ const GAMES = [
     genre: "Puzzle • Mystery",
     rating: "4.7",
     players: "980K",
-    thumb: "/landscape/58.png",
-    portrait: "/portrait/42.png",
+    thumb: "/newlandscape/THE SHADOW GAME EP1.png",
+    portrait: "/newportrait/THE DIARY SECRETS.jpg",
     desc: "Solve cryptic puzzles inside a haunted manor. Every room hides a secret — can you escape before midnight?",
     tag: "TOP RATED",
     tagColor: "#f59e0b",
@@ -48,8 +48,8 @@ const GAMES = [
     genre: "Adventure • Endless",
     rating: "4.5",
     players: "3.2M",
-    thumb: "/landscape/26.png",
-    portrait: "/portrait/26.png",
+    thumb: "/newlandscape/ROGUE MISSON.png",
+    portrait: "/newportrait/ROGUE MISSON.jpg",
     desc: "Race through dangerous terrain as a rogue operative. Dodge traps, collect intel and survive the chase.",
     tag: "POPULAR",
     tagColor: "#8b5cf6",
@@ -61,8 +61,8 @@ const GAMES = [
     genre: "RPG • Strategy",
     rating: "4.9",
     players: "750K",
-    thumb: "/landscape/100.png",
-    portrait: "/portrait/64.png",
+    thumb: "/newlandscape/DARK EMPIRE.png",
+    portrait: "/newportrait/THE CRIME CIRCLE.jpg",
     desc: "Command armies, forge alliances and conquer kingdoms in this epic dark fantasy RPG.",
     tag: "EXCLUSIVE",
     tagColor: "#E50914",
@@ -160,7 +160,7 @@ export default function GamesSection({ hasAccess, onRequireAccess }: Props) {
             style={{ background: "#111", border: "1px solid rgba(255,255,255,0.07)" }}
             onClick={() => handlePlay(game)}
           >
-            <div className="relative overflow-hidden" style={{ aspectRatio: "2/3" }}>
+            <div className="relative overflow-hidden" style={{ aspectRatio: "1080 / 1350" }}>
               <img src={game.portrait} alt={game.title}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 style={{ filter: "brightness(0.6)" }} />

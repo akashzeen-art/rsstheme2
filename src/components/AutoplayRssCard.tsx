@@ -12,6 +12,8 @@ export interface RssCardItem {
   fallback?: string;
   date: string;
   source: string;
+  /** Plain-text excerpt from RSS description */
+  excerpt?: string;
 }
 
 export function timeAgo(dateStr: string) {
@@ -127,11 +129,14 @@ export function AutoplayRssCard({
   width,
   aspect = "16/9",
   lines = 2,
+  onOpen,
 }: {
   item: RssCardItem;
   width: number;
   aspect?: string;
   lines?: number;
+  /** Open Live Feed panel (article proxy / stream) */
+  onOpen?: () => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mediaRef = useRef<HTMLDivElement>(null);
@@ -209,6 +214,10 @@ export function AutoplayRssCard({
   return (
     <div
       ref={ref}
+      role={onOpen ? "button" : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      onClick={onOpen}
+      onKeyDown={onOpen ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onOpen(); } } : undefined}
       style={{
         flexShrink: 0,
         width,
@@ -218,6 +227,7 @@ export function AutoplayRssCard({
         border: "1px solid #1a1a1a",
         display: "flex",
         flexDirection: "column",
+        cursor: onOpen ? "pointer" : "default",
       }}
     >
       <div

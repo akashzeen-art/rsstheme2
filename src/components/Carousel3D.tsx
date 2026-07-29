@@ -1,18 +1,18 @@
 import { useEffect, useRef } from "react";
 
 const IMAGES = [
-  "/landscape/1.png",
-  "/landscape/5.png",
-  "/landscape/9.png",
-  "/landscape/14.png",
-  "/landscape/18.png",
-  "/landscape/22.png",
-  "/landscape/27.png",
-  "/landscape/31.png",
-  "/landscape/35.png",
-  "/landscape/40.png",
-  "/landscape/51.png",
-  "/landscape/60.png",
+  "/newlandscape/RAAZ BEYOND FEAR.png",
+  "/newlandscape/THE SECRET ROUT EP 1.png",
+  "/newlandscape/SCILENT TRIGGER.png",
+  "/newlandscape/THE HIDDEN ENEMY.png",
+  "/newlandscape/THE FINAL DHOKHA.png",
+  "/newlandscape/OPERATION NIGHTFALL.png",
+  "/newlandscape/DANGEROUS MINDS EP4.png",
+  "/newlandscape/THE DARK NETWORK.png",
+  "/newlandscape/LAST MISSION ALIVE.png",
+  "/newlandscape/MYSTERY JUNCTION.png",
+  "/newlandscape/THE SHADOW GAME EP3.png",
+  "/newlandscape/ROGUE NATION.png",
 ];
 
 const N = IMAGES.length;

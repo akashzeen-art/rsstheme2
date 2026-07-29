@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { AutoplayRssCard, RssCardItem } from "./AutoplayRssCard";
 import VerticalReelsFeed from "./VerticalReelsFeed";
+import RssScrollIframe from "./RssScrollIframe";
 import {
   platformRssCategories,
-  getCategoryFeedUrl,
   type PlatformRssCategory,
 } from "../config/platformRss.config";
-import { fetchPlatformRss } from "../lib/platformRss";
+import { fetchCategoryRss } from "../lib/rssFeeds";
 
 const BADGE_COLORS: Record<string, string> = {
   SHORTS: "linear-gradient(135deg, #f09433, #dc2743, #bc1888)",
@@ -14,6 +14,7 @@ const BADGE_COLORS: Record<string, string> = {
   SPORTS: "#16a34a",
   MOVIES: "#2563eb",
   SERIES: "#a855f7",
+  RSS: "#E50914",
 };
 
 function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
@@ -27,15 +28,9 @@ function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
       return;
     }
 
-    const feedUrl = getCategoryFeedUrl(cat);
-    if (!feedUrl) {
-      setLoading(false);
-      return;
-    }
-
     let cancelled = false;
     setLoading(true);
-    fetchPlatformRss(feedUrl, cat.limit ?? 12)
+    fetchCategoryRss(cat.id, cat.limit ?? 12)
       .then(({ items: next }) => {
         if (cancelled) return;
         setItems(next);
@@ -63,12 +58,13 @@ function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
   if (!items.length) return null;
 
   const isReel = cat.layout === "reel";
+  const isArticles = cat.layout === "articles";
   const badge = cat.badge || cat.title.toUpperCase();
   const badgeBg = BADGE_COLORS[badge] || "#E50914";
 
   return (
-    <div style={{ padding: "28px 0 8px" }}>
-      <div style={{ padding: "0 24px 16px", display: "flex", alignItems: "center", gap: 12 }}>
+    <div style={{ padding: "28px 0 20px" }}>
+      <div style={{ padding: "0 24px 14px", display: "flex", alignItems: "center", gap: 12 }}>
         <span
           style={{
             background: badgeBg,
@@ -87,7 +83,7 @@ function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
           {cat.title}
         </h2>
         <span style={{ color: "#666", fontSize: 12 }}>
-          {isReel ? "Swipe up" : "Autoplaying"}
+          {isReel ? "Swipe up" : isArticles ? "Scroll inside · Read More in iframe" : "Autoplaying"}
         </span>
       </div>
       <p className="rss-live-badge-wrap">
@@ -101,6 +97,8 @@ function CategoryRow({ cat }: { cat: PlatformRssCategory }) {
 
       {isReel ? (
         <VerticalReelsFeed items={items} />
+      ) : isArticles ? (
+        <RssScrollIframe title={cat.title} items={items} />
       ) : (
         <div
           style={{

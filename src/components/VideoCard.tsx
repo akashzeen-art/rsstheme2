@@ -11,7 +11,7 @@ export default function VideoCard({ id, title, thumbnail, category, aspect, onCl
   return (
     <motion.div
       className="relative cursor-pointer rounded-sm overflow-visible group"
-      style={{ aspectRatio: aspect === "portrait" ? "2/3" : "16/9" }}
+      style={{ aspectRatio: aspect === "portrait" ? "1080 / 1350" : "1350 / 760" }}
       data-video-id={id}
       onHoverStart={() => setHovered(true)}
       onHoverEnd={() => setHovered(false)}
@@ -47,7 +47,7 @@ export default function VideoCard({ id, title, thumbnail, category, aspect, onCl
             style={{ transformOrigin: "center bottom", boxShadow: "0 8px 40px rgba(0,0,0,0.9)" }}
             onClick={e => { e.stopPropagation(); onClick(); }}
           >
-            <div className="relative" style={{ aspectRatio: aspect === "portrait" ? "2/3" : "16/9" }}>
+            <div className="relative" style={{ aspectRatio: aspect === "portrait" ? "1080 / 1350" : "1350 / 760" }}>
               <img src={thumbnail} alt={title} className="w-full h-full object-cover" />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to top, rgba(0,0,0,1) 0%, transparent 60%)" }} />
               <div className="absolute inset-0 flex items-center justify-center">

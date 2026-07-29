@@ -41,7 +41,7 @@ export default function DeviceShowcase() {
             boxShadow: "0 30px 80px rgba(0,0,0,0.8), 0 0 40px rgba(229,9,20,0.15)",
           }}>
             <div className="relative" style={{ aspectRatio: "16/9", background: "#111" }}>
-              <img src="/landscape/3.png" alt="TV Screen" className="w-full h-full object-cover" style={{ filter: "brightness(0.75)" }} />
+              <img src="/newlandscape/SCILENT CHASE.png" alt="TV Screen" className="w-full h-full object-cover" style={{ filter: "brightness(0.75)" }} />
               <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(0,0,0,0.7) 0%, transparent 60%)" }} />
               <div className="absolute inset-0 flex">
                 <div className="h-full flex flex-col gap-3 py-4 px-3" style={{ width: "28%", background: "rgba(0,0,0,0.6)", backdropFilter: "blur(4px)" }}>
@@ -79,7 +79,7 @@ export default function DeviceShowcase() {
               <div className="w-10 h-1.5 rounded-full" style={{ background: "#333" }} />
             </div>
             <div className="relative" style={{ aspectRatio: "9/16", background: "#111" }}>
-              <img src="/portrait/22.png" alt="Phone Screen" className="w-full h-full object-cover" style={{ filter: "brightness(0.7)" }} />
+              <img src="/newportrait/THE MISSING LINK.jpg" alt="Phone Screen" className="w-full h-full object-cover" style={{ filter: "brightness(0.7)" }} />
 
             </div>
           </div>
